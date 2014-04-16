@@ -8,16 +8,16 @@ A Apache Spark metric sink that sends a notification message to an Azure Storage
 Usage
 ==
 
-Add the following lines to conf/metrics.properties
-
-*.sink.queue.class=org.apache.spark.metrics.sink.ServiceBusQueueSink
-*.sink.queue.period=1
-*.sink.queue.unit=seconds
-*.sink.queue.connection=DefaultEndpointsProtocol=http;AccountName=%storageName%;AccountKey=$storageKey%
-*.sink.queue.queue=%queueName%
-
-Note:
-Substitute %storageName% and %storageKey% as apropriate for the storage queue, and replace %queueName%
+Add the following lines to conf/metrics.properties<br>
+<br>
+*.sink.queue.class=org.apache.spark.metrics.sink.ServiceBusQueueSink<br>
+*.sink.queue.period=1<br>
+*.sink.queue.unit=seconds<br>
+*.sink.queue.connection=DefaultEndpointsProtocol=http;AccountName=%storageName%;AccountKey=$storageKey%<br>
+*.sink.queue.queue=%queueName%<br>
+<br>
+Note:<br>
+Substitute <b>%storageName%</b> and <b>%storageKey%</b> as apropriate for the storage queue, and replace <b>%queueName%</b><br>
 
 Bugs
 ==
