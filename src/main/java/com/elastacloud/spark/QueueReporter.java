@@ -78,10 +78,11 @@ public class QueueReporter extends ScheduledReporter {
          * @param connectionString the connectionString for the queue
          * @return a {@link QueueReporter}
          */
-        public QueueReporter build(String connectionString, String queueName) {
+        public QueueReporter build(String connectionString, String queueName, String clusterName) {
             return new QueueReporter(registry,
                     connectionString,
                     queueName,
+                    clusterName,
                     locale,
                     rateUnit,
                     durationUnit,
@@ -94,6 +95,7 @@ public class QueueReporter extends ScheduledReporter {
 
     private final String connectionString;
     private final String queueName;
+    private final String clusterName;
     private final Locale locale;
     private final Clock clock;
     private boolean hasHadActiveStages = false;
@@ -101,16 +103,18 @@ public class QueueReporter extends ScheduledReporter {
      private QueueReporter(MetricRegistry registry,
                           String connectionString,
                           String queueName,
+                          String clusterName,
                           Locale locale,
                           TimeUnit rateUnit,
                           TimeUnit durationUnit,
                           Clock clock,
                           MetricFilter filter) {
 
-        super(registry, "servicebusqueue-reporter", filter, rateUnit, durationUnit);
+        super(registry, "azurestoragequeue-reporter", filter, rateUnit, durationUnit);
 
         this.connectionString = connectionString;
         this.queueName = queueName;
+        this.clusterName = clusterName;
         this.locale = locale;
         this.clock = clock;
         this.sbm = new StorageQueueWriter(connectionString, queueName);
@@ -144,9 +148,9 @@ public class QueueReporter extends ScheduledReporter {
                 //send a complete with failure message if the failed stages > 0
                 if(failedStages > 0 )
                     //we can send a delete message with job failure
-                    sbm.sendMessage("finished with failure");
+                    sbm.sendMessage(clusterName + ",false");
                 else //send success message
-                    sbm.sendMessage("finished");
+                    sbm.sendMessage(clusterName + ",true");
 
             }catch (Exception e)
             {

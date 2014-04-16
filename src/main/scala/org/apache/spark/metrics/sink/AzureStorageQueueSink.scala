@@ -25,16 +25,18 @@ import java.util.concurrent.TimeUnit
 import com.elastacloud.spark.QueueReporter
 import org.apache.spark.metrics.MetricsSystem
 
-class ServiceBusQueueSink(val property: Properties, val registry: MetricRegistry) extends Sink {
+class AzureStorageQueueSink(val property: Properties, val registry: MetricRegistry) extends Sink {
   val QUEUE_KEY_PERIOD = "period"
   val QUEUE_KEY_UNIT = "unit"
   val QUEUE_KEY_CONNECTION = "connection"
   val QUEUE_KEY_QUEUE = "queue"
+  val CLUSTER_NAME = "clustername"
 
   val QUEUE_DEFAULT_PERIOD = 10
   val QUEUE_DEFAULT_UNIT = "SECONDS"
   val QUEUE_DEFAULT_CONNECTION = null
   val QUEUE_DEFAULT_QUEUE = null
+  val CLUSTER_NAME_DEFAULT = null
 
   val pollPeriod = Option(property.getProperty(QUEUE_KEY_PERIOD)) match {
     case Some(s) => s.toInt
@@ -56,12 +58,17 @@ class ServiceBusQueueSink(val property: Properties, val registry: MetricRegistry
     case None => QUEUE_DEFAULT_QUEUE
   }
 
+  val clusterName = Option(property.getProperty(CLUSTER_NAME)) match {
+    case Some(s) => s
+    case None => CLUSTER_NAME_DEFAULT
+  }
+
   MetricsSystem.checkMinimalPollingPeriod(pollUnit, pollPeriod)
 
   val reporter: QueueReporter = QueueReporter.forRegistry(registry)
     .convertDurationsTo(TimeUnit.MILLISECONDS)
     .convertRatesTo(TimeUnit.SECONDS)
-    .build(connectionStr, queueNameStr)
+    .build(connectionStr, queueNameStr, clusterName)
 
   override def start() {
     reporter.start(pollPeriod, pollUnit)
