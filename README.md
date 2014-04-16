@@ -10,7 +10,7 @@ Usage
 
 Add the following lines to conf/metrics.properties<br>
 <br>
-*.sink.queue.class=org.apache.spark.metrics.sink.ServiceBusQueueSink<br>
+*.sink.queue.class=org.apache.spark.metrics.sink.StorageQueueSink<br>
 *.sink.queue.period=1<br>
 *.sink.queue.unit=seconds<br>
 *.sink.queue.connection=DefaultEndpointsProtocol=http;AccountName=%storageName%;AccountKey=$storageKey%<br>
