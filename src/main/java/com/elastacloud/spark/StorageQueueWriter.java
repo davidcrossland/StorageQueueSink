@@ -35,7 +35,7 @@ public class StorageQueueWriter {
             queue = queueClient.getQueueReference(queueName);
 
             // Create the queue if it doesn't already exist
-            queue.createIfNotExist();
+            //queue.createIfNotExist();
 
         } catch (Exception e) {
             e.printStackTrace();
