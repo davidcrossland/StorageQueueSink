@@ -28,7 +28,8 @@ import org.apache.spark.metrics.MetricsSystem
 class AzureStorageQueueSink(val property: Properties, val registry: MetricRegistry) extends Sink {
   val QUEUE_KEY_PERIOD = "period"
   val QUEUE_KEY_UNIT = "unit"
-  val QUEUE_KEY_CONNECTION = "connection"
+  val QUEUE_KEY_URI = "uri"
+  val QUEUE_KEY_SAS = "sas"
   val QUEUE_KEY_QUEUE = "queue"
   val CLUSTER_NAME = "clustername"
 
@@ -48,9 +49,14 @@ class AzureStorageQueueSink(val property: Properties, val registry: MetricRegist
     case None => TimeUnit.valueOf(QUEUE_DEFAULT_UNIT)
   }
 
-  val connectionStr = Option(property.getProperty(QUEUE_KEY_CONNECTION)) match {
+  val baseUri = Option(property.getProperty(QUEUE_KEY_URI)) match {
     case Some(s) => s
     case None => QUEUE_DEFAULT_CONNECTION
+  }
+
+  val sharedAccessSignature = Option(property.getProperty(QUEUE_KEY_SAS)) match {
+    case Some(s) => s
+    case None => QUEUE_KEY_SAS
   }
 
   val queueNameStr = Option(property.getProperty(QUEUE_KEY_QUEUE)) match {
@@ -68,13 +74,15 @@ class AzureStorageQueueSink(val property: Properties, val registry: MetricRegist
   val reporter: QueueReporter = QueueReporter.forRegistry(registry)
     .convertDurationsTo(TimeUnit.MILLISECONDS)
     .convertRatesTo(TimeUnit.SECONDS)
-    .build(connectionStr, queueNameStr, clusterName)
+    .build(baseUri, queueNameStr, sharedAccessSignature, clusterName)
 
   override def start() {
+    println("Starting metrics ...")
     reporter.start(pollPeriod, pollUnit)
   }
 
   override def stop() {
+    println("Stopping metrics ...")
     reporter.stop()
   }
 }

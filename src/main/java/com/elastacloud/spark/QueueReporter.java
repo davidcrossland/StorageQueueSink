@@ -75,13 +75,14 @@ public class QueueReporter extends ScheduledReporter {
         /**
          * Builds a {@link QueueReporter} with the given properties,
          *
-         * @param connectionString the connectionString for the queue
+         * @param  the connectionString for the queue
          * @return a {@link QueueReporter}
          */
-        public QueueReporter build(String connectionString, String queueName, String clusterName) {
+        public QueueReporter build(String baseUri, String queueName, String sas, String clusterName) {
             return new QueueReporter(registry,
-                    connectionString,
+                    baseUri,
                     queueName,
+                    sas,
                     clusterName,
                     locale,
                     rateUnit,
@@ -93,16 +94,18 @@ public class QueueReporter extends ScheduledReporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueReporter.class);
 
-    private final String connectionString;
+    private final String baseUri;
+    private final String sharedAccessSignature;
     private final String queueName;
     private final String clusterName;
     private final Locale locale;
     private final Clock clock;
     private boolean hasHadActiveStages = false;
     private StorageQueueWriter sbm;
-     private QueueReporter(MetricRegistry registry,
-                          String connectionString,
+    private QueueReporter(MetricRegistry registry,
+                          String baseUri,
                           String queueName,
+                          String sharedAccessSignature,
                           String clusterName,
                           Locale locale,
                           TimeUnit rateUnit,
@@ -112,12 +115,13 @@ public class QueueReporter extends ScheduledReporter {
 
         super(registry, "azurestoragequeue-reporter", filter, rateUnit, durationUnit);
 
-        this.connectionString = connectionString;
+        this.baseUri = baseUri;
+        this.sharedAccessSignature = sharedAccessSignature;
         this.queueName = queueName;
         this.clusterName = clusterName;
         this.locale = locale;
         this.clock = clock;
-        this.sbm = new StorageQueueWriter(connectionString, queueName);
+        this.sbm = new StorageQueueWriter(baseUri, queueName, sharedAccessSignature);
     }
 
     @Override
@@ -142,6 +146,7 @@ public class QueueReporter extends ScheduledReporter {
         //send a message if the job has had active stages, and no job is running/waiting
         if(hasHadActiveStages && allJobs > 0 && activeJobs == 0 && runningStages == 0 && waitingStages == 0)
         {
+            System.out.println("Detected finished jobs - has failures="+(failedStages > 0));
             LOGGER.info("Detected finished jobs - has failures="+(failedStages > 0));
 
             try {

@@ -1,6 +1,7 @@
 package com.elastacloud.spark;
 
 import com.microsoft.windowsazure.services.core.storage.CloudStorageAccount;
+import com.microsoft.windowsazure.services.core.storage.StorageCredentialsSharedAccessSignature;
 import com.microsoft.windowsazure.services.core.storage.StorageException;
 import com.microsoft.windowsazure.services.queue.client.CloudQueue;
 import com.microsoft.windowsazure.services.queue.client.CloudQueueClient;
@@ -9,6 +10,7 @@ import com.microsoft.windowsazure.services.queue.client.CloudQueueMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
@@ -21,13 +23,15 @@ public class StorageQueueWriter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageQueueWriter.class);
     private  CloudQueue queue = null;
 
-    public StorageQueueWriter(String connectionString, String queueName)
+    public StorageQueueWriter(String uri, String queueName, String sas)
     {
         try {
-            CloudStorageAccount storageAccount = CloudStorageAccount.parse(connectionString);
+
             LOGGER.trace("Creating storage account connection");
             // Create the queue client
-            CloudQueueClient queueClient = storageAccount.createCloudQueueClient();
+            StorageCredentialsSharedAccessSignature credentials = new StorageCredentialsSharedAccessSignature(sas);
+            URI baseUri = new URI(uri);
+            CloudQueueClient queueClient = new CloudQueueClient(baseUri,credentials);
             queue = queueClient.getQueueReference(queueName);
 
             // Create the queue if it doesn't already exist
