@@ -139,6 +139,7 @@ public class QueueReporter extends ScheduledReporter {
         int runningStages = getValueForKey(gauges, "runningStages");
         int waitingStages = getValueForKey(gauges, "waitingStages");
 
+        // TODO: update this to ensure that we wait for 15 minutes and check to see whether there are any jobs that have been run in this window
         //allJobs can be set to 1 before any jobs have actually been submitted.
         if(activeJobs > 0)
             hasHadActiveStages = true;
